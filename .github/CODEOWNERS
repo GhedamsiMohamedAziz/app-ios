@@ -1,0 +1,22 @@
+# Code ownership — placeholders, replace with real GitHub teams.
+
+/docs/architecture/        @architect
+/.github/CODEOWNERS        @code-reviewer
+/.github/PULL_REQUEST_TEMPLATE.md  @code-reviewer
+/docs/review-checklist.md  @code-reviewer
+/.github/workflows/        @build-error-resolver
+/tsconfig.json             @build-error-resolver
+/src/lib/security/         @security-reviewer
+/.env.example              @security-reviewer
+/SECURITY.md               @security-reviewer
+/docs/performance/         @performance-optimizer
+/e2e/                      @e2e-runner
+/src/lib/pricing/          @mle-reviewer
+/db/                       @database-reviewer
+/docs/CODEMAP.md           @doc-updater
+/docs/README.md            @doc-updater
+/src/components/           @react-reviewer
+/src/app/                  @react-reviewer
+/src/lib/                  @typescript-reviewer
+/src/app/api/              @typescript-reviewer
+/src/lib/errors/           @silent-failure-hunter

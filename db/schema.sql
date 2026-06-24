@@ -23,8 +23,13 @@ CREATE TABLE part_requests (
   buyer_label   TEXT NOT NULL,
   urgency       TEXT NOT NULL DEFAULT 'standard' CHECK (urgency IN ('critical','urgent','standard','scheduled')),
   status        TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at    TIMESTAMPTZ              -- NULL only in scheduled/passive mode (DARRAGI-BIDWIN-002)
 );
+
+-- Closer relies on (status, expires_at): fetch open + already expired rows.
+CREATE INDEX idx_requests_expires ON part_requests(status, expires_at)
+  WHERE status = 'open';
 
 CREATE TABLE bids (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),

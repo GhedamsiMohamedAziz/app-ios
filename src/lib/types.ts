@@ -32,6 +32,8 @@ export interface PartRequest {
   urgency: Urgency;
   status: RequestStatus;
   createdAt: string; // ISO
+  /** ISO. Computed from urgency. Null only in passive mode (urgency=scheduled). */
+  expiresAt: string | null;
 }
 
 /** A seller's offer on a request. */

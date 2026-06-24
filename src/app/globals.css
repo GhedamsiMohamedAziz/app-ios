@@ -180,5 +180,26 @@ a.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
 .urgency-chip__label { color: var(--color-ink); }
 .urgency-tradeoff { min-height: 1.2em; }
 
+/* Bid window — countdown + closed state */
+.pill--countdown {
+  color: var(--color-ink);
+  background: #fff;
+  border-color: var(--color-line);
+  font-variant-numeric: tabular-nums;
+}
+.pill--closed {
+  color: var(--color-ink-soft);
+  background: var(--color-surface-2);
+  border-color: var(--color-line);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+.card--closed { opacity: 0.72; }
+.card--closed .card__title { color: var(--color-ink-soft); }
+
+.panel--closed { background: var(--color-surface-2); }
+.panel--closed h3 { color: var(--color-ink-soft); }
+
 footer.site { border-top: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-ink-soft); font-size: 0.85rem; }
 footer.site .container { padding-top: 1.4rem; padding-bottom: 1.4rem; }

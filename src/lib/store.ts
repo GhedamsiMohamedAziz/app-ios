@@ -5,6 +5,7 @@ import type {
   PartRequest,
 } from "./types";
 import { DEFAULT_CURRENCY } from "./config";
+import { computeExpiresAt, isExpired } from "./expiry";
 
 /**
  * In-memory store for v1 (no database yet). State lives for the lifetime of the
@@ -18,40 +19,53 @@ interface Db {
   bids: Bid[];
 }
 
-const seedRequests: PartRequest[] = [
-  {
-    id: "req-1001",
-    vehicle: { make: "Volkswagen", model: "Golf 7", year: 2016 },
-    partName: "Plaquettes de frein avant",
-    description:
-      "Jeu de plaquettes avant pour Golf 7 1.6 TDI. Origine ou équivalent qualité OEM.",
-    buyer: { lat: 36.8065, lng: 10.1815, label: "Tunis Centre" },
-    urgency: "standard",
-    status: "open",
-    createdAt: "2026-06-24T08:00:00.000Z",
-  },
-  {
-    id: "req-1002",
-    vehicle: { make: "Peugeot", model: "208", year: 2019 },
-    partName: "Rétroviseur droit électrique",
-    description:
-      "Rétroviseur extérieur côté passager, électrique, peint. Couleur gris.",
-    buyer: { lat: 35.8256, lng: 10.6411, label: "Sousse" },
-    urgency: "urgent",
-    status: "open",
-    createdAt: "2026-06-24T09:30:00.000Z",
-  },
-  {
-    id: "req-1003",
-    vehicle: { make: "Renault", model: "Clio 4", year: 2014 },
-    partName: "Alternateur",
-    description: "Alternateur reconditionné accepté. 1.5 dCi.",
-    buyer: { lat: 36.4513, lng: 10.7357, label: "Nabeul" },
-    urgency: "critical",
-    status: "open",
-    createdAt: "2026-06-24T10:15:00.000Z",
-  },
-];
+// Seed is built relative to server start so the demo always has fresh windows
+// (otherwise everything would be expired at module-load time on a static date).
+const seedRequests: PartRequest[] = (() => {
+  type Spec = Omit<PartRequest, "createdAt" | "expiresAt"> & { ageMin: number };
+  const specs: Spec[] = [
+    {
+      id: "req-1001",
+      vehicle: { make: "Volkswagen", model: "Golf 7", year: 2016 },
+      partName: "Plaquettes de frein avant",
+      description:
+        "Jeu de plaquettes avant pour Golf 7 1.6 TDI. Origine ou équivalent qualité OEM.",
+      buyer: { lat: 36.8065, lng: 10.1815, label: "Tunis Centre" },
+      urgency: "standard",
+      status: "open",
+      ageMin: 30, // ~23 h 30 restant (fenêtre 24 h)
+    },
+    {
+      id: "req-1002",
+      vehicle: { make: "Peugeot", model: "208", year: 2019 },
+      partName: "Rétroviseur droit électrique",
+      description:
+        "Rétroviseur extérieur côté passager, électrique, peint. Couleur gris.",
+      buyer: { lat: 35.8256, lng: 10.6411, label: "Sousse" },
+      urgency: "urgent",
+      status: "open",
+      ageMin: 5, // ~25 min restant (fenêtre 30 min)
+    },
+    {
+      id: "req-1003",
+      vehicle: { make: "Renault", model: "Clio 4", year: 2014 },
+      partName: "Alternateur",
+      description: "Alternateur reconditionné accepté. 1.5 dCi.",
+      buyer: { lat: 36.4513, lng: 10.7357, label: "Nabeul" },
+      urgency: "critical",
+      status: "open",
+      ageMin: 1, // ~4 min restant (fenêtre 5 min)
+    },
+  ];
+  return specs.map(({ ageMin, ...rest }) => {
+    const createdAt = new Date(Date.now() - ageMin * 60_000).toISOString();
+    return {
+      ...rest,
+      createdAt,
+      expiresAt: computeExpiresAt(createdAt, rest.urgency),
+    };
+  });
+})();
 
 const seedBids: Bid[] = [
   {
@@ -117,11 +131,24 @@ let counter = 0;
 const nowIso = (): string => new Date().toISOString();
 const nextId = (prefix: string): string => `${prefix}-${Date.now()}-${counter++}`;
 
+/**
+ * Lazily flip expired open requests to "closed". v1 has no scheduler — the
+ * window is enforced at read time. A real cron / job replaces this when we
+ * move to Postgres (BIDWIN-001 production scope).
+ */
+function closeExpired(): void {
+  for (const r of db.requests) {
+    if (r.status === "open" && isExpired(r)) r.status = "closed";
+  }
+}
+
 export function listRequests(): PartRequest[] {
+  closeExpired();
   return [...db.requests].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export function getRequest(id: string): PartRequest | undefined {
+  closeExpired();
   return db.requests.find((r) => r.id === id);
 }
 
@@ -134,6 +161,7 @@ export function countBids(requestId: string): number {
 }
 
 export function createRequest(input: NewRequestInput): PartRequest {
+  const createdAt = nowIso();
   const request: PartRequest = {
     id: nextId("req"),
     vehicle: { make: input.make, model: input.model, year: input.year },
@@ -142,7 +170,8 @@ export function createRequest(input: NewRequestInput): PartRequest {
     buyer: { lat: input.buyerLat, lng: input.buyerLng, label: input.buyerLabel },
     urgency: input.urgency,
     status: "open",
-    createdAt: nowIso(),
+    createdAt,
+    expiresAt: computeExpiresAt(createdAt, input.urgency),
   };
   db.requests.push(request);
   return request;

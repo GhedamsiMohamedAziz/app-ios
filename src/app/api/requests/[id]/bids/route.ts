@@ -29,6 +29,12 @@ export async function POST(req: Request, { params }: Params) {
       { status: 404 },
     );
   }
+  if (request.status !== "open") {
+    return NextResponse.json(
+      { data: null, error: "This request is no longer accepting bids." },
+      { status: 409 },
+    );
+  }
   try {
     const body = await req.json();
     const input = parseNewBid(body);

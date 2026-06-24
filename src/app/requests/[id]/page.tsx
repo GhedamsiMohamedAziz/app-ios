@@ -4,6 +4,7 @@ import { getRequest, listBidsForRequest } from "@/lib/store";
 import { rankBids } from "@/lib/ranking";
 import { conditionLabel, formatPrice, stars } from "@/lib/format";
 import { formatWindow, urgencyMeta } from "@/lib/urgency";
+import { timeRemaining } from "@/lib/expiry";
 import { PlaceBidForm } from "@/components/PlaceBidForm";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +46,13 @@ export default function RequestDetailPage({
         <div className="meta-row">
           <span>📍 {request.buyer.label}</span>
           <span>⏱ Fenêtre de bid : {formatWindow(request.urgency)}</span>
+          {request.status === "closed" ? (
+            <span className="pill pill--closed">Clôturée</span>
+          ) : (
+            <span className="pill pill--countdown" title="Temps restant">
+              ⏱ Reste {timeRemaining(request)}
+            </span>
+          )}
           <span>
             {ranked.length} {ranked.length > 1 ? "offres reçues" : "offre reçue"}
           </span>
@@ -116,7 +124,17 @@ export default function RequestDetailPage({
         </div>
 
         <aside>
-          <PlaceBidForm requestId={request.id} />
+          {request.status === "open" ? (
+            <PlaceBidForm requestId={request.id} />
+          ) : (
+            <div className="panel panel--closed" role="status">
+              <h3>Demande clôturée</h3>
+              <p className="muted" style={{ margin: 0 }}>
+                La fenêtre de bid est terminée. L'acheteur va finaliser avec le
+                meilleur deal classé. Plus d'offres acceptées.
+              </p>
+            </div>
+          )}
         </aside>
       </div>
     </section>

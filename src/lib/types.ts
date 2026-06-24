@@ -3,6 +3,13 @@
 export type PartCondition = "new" | "used" | "refurbished";
 export type RequestStatus = "open" | "closed";
 
+/**
+ * Buyer-declared urgency. Drives the bid window duration (see lib/urgency.ts)
+ * and seller-notification priority. `scheduled` reserves the slot for the v1.1
+ * passive mode (target price + daily recurrence) — see DARRAGI-PASSIVE-001.
+ */
+export type Urgency = "critical" | "urgent" | "standard" | "scheduled";
+
 export interface GeoPoint {
   lat: number;
   lng: number;
@@ -22,6 +29,7 @@ export interface PartRequest {
   partName: string;
   description: string;
   buyer: GeoPoint;
+  urgency: Urgency;
   status: RequestStatus;
   createdAt: string; // ISO
 }
@@ -60,6 +68,7 @@ export interface NewRequestInput {
   buyerLabel: string;
   buyerLat: number;
   buyerLng: number;
+  urgency: Urgency;
 }
 
 export interface NewBidInput {

@@ -1,13 +1,23 @@
 import Link from "next/link";
 import type { PartRequest } from "@/lib/types";
 import { countBids } from "@/lib/store";
+import { urgencyMeta } from "@/lib/urgency";
 
 export function RequestCard({ request }: { request: PartRequest }) {
   const bids = countBids(request.id);
+  const urgency = urgencyMeta(request.urgency);
   return (
     <Link href={`/requests/${request.id}`} className="card">
-      <div className="card__vehicle">
-        {request.vehicle.make} {request.vehicle.model} · {request.vehicle.year}
+      <div className="card__top-row">
+        <div className="card__vehicle">
+          {request.vehicle.make} {request.vehicle.model} · {request.vehicle.year}
+        </div>
+        <span
+          className={`urgency-badge urgency-badge--${request.urgency}`}
+          title={`Urgence : ${urgency.label}`}
+        >
+          {urgency.emoji} {urgency.label}
+        </span>
       </div>
       <h3 className="card__title">{request.partName}</h3>
       <p className="card__desc">{request.description}</p>

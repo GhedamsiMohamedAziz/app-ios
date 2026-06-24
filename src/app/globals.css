@@ -149,5 +149,36 @@ a.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
 
 .empty { text-align: center; color: var(--color-ink-soft); padding: 2.5rem 1rem; border: 1px dashed var(--color-line); border-radius: var(--radius); }
 
+/* Urgency */
+.card__top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.6rem; margin-bottom: 0.2rem; }
+.urgency-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem; border-radius: 999px;
+  background: var(--color-surface-2); border: 1px solid var(--color-line);
+  color: var(--color-ink-soft); white-space: nowrap;
+}
+.urgency-badge--critical { color: #b3261e; background: #fdecea; border-color: #f6c9c4; }
+.urgency-badge--urgent   { color: var(--color-accent); background: var(--color-accent-soft); border-color: transparent; }
+.urgency-badge--standard { color: var(--color-ink-soft); }
+.urgency-badge--scheduled { color: var(--color-best); background: var(--color-best-soft); border-color: transparent; }
+
+.urgency-picker { border: 0; padding: 0; margin: 0 0 0.9rem; }
+.urgency-picker legend { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem; padding: 0; }
+.urgency-picker__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; }
+.urgency-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+  padding: 0.6rem 0.4rem; border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm); background: var(--color-surface-2);
+  cursor: pointer; transition: border-color 140ms, background 140ms, transform 100ms;
+  font-size: 0.78rem; font-weight: 600;
+}
+.urgency-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.urgency-chip:hover { border-color: #d4ccba; }
+.urgency-chip.is-selected { border-color: var(--color-accent); background: #fff; box-shadow: 0 0 0 1px var(--color-accent); }
+.urgency-chip__emoji { font-size: 1.2rem; line-height: 1; }
+.urgency-chip__label { color: var(--color-ink); }
+.urgency-tradeoff { min-height: 1.2em; }
+
 footer.site { border-top: 1px solid var(--color-line); background: var(--color-surface); color: var(--color-ink-soft); font-size: 0.85rem; }
 footer.site .container { padding-top: 1.4rem; padding-bottom: 1.4rem; }

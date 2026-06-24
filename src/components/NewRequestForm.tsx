@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Urgency } from "@/lib/types";
+import { URGENCY_LEVELS, urgencyMeta } from "@/lib/urgency";
 
 const PRESET_LOCATIONS = [
   { label: "Tunis Centre", lat: 36.8065, lng: 10.1815 },
@@ -11,10 +13,15 @@ const PRESET_LOCATIONS = [
   { label: "Nabeul", lat: 36.4513, lng: 10.7357 },
 ];
 
+const PICKABLE_URGENCY: Urgency[] = URGENCY_LEVELS.filter(
+  (u) => urgencyMeta(u).enabledInV1,
+);
+
 export function NewRequestForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [urgency, setUrgency] = useState<Urgency>("standard");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,6 +42,7 @@ export function NewRequestForm() {
       buyerLabel: loc.label,
       buyerLat: loc.lat,
       buyerLng: loc.lng,
+      urgency,
     };
 
     try {
@@ -125,6 +133,35 @@ export function NewRequestForm() {
           Plus c'est précis, plus le matching vendeur est juste.
         </p>
       </div>
+
+      <fieldset className="urgency-picker">
+        <legend>Urgence</legend>
+        <div className="urgency-picker__row">
+          {PICKABLE_URGENCY.map((u) => {
+            const meta = urgencyMeta(u);
+            const selected = urgency === u;
+            return (
+              <label
+                key={u}
+                className={`urgency-chip${selected ? " is-selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="urgency"
+                  value={u}
+                  checked={selected}
+                  onChange={() => setUrgency(u)}
+                />
+                <span className="urgency-chip__emoji">{meta.emoji}</span>
+                <span className="urgency-chip__label">{meta.label}</span>
+              </label>
+            );
+          })}
+        </div>
+        <p className="form-note urgency-tradeoff" role="status">
+          {urgencyMeta(urgency).tradeoff}
+        </p>
+      </fieldset>
 
       <button className="btn btn--primary" type="submit" disabled={submitting}>
         {submitting ? "Envoi…" : "Publier la demande"}

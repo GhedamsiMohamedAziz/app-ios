@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getRequest, listBidsForRequest } from "@/lib/store";
 import { rankBids } from "@/lib/ranking";
 import { conditionLabel, formatPrice, stars } from "@/lib/format";
+import { formatWindow, urgencyMeta } from "@/lib/urgency";
 import { PlaceBidForm } from "@/components/PlaceBidForm";
 
 export const dynamic = "force-dynamic";
@@ -24,8 +25,18 @@ export default function RequestDetailPage({
       </Link>
 
       <div className="detail__head">
-        <div className="card__vehicle">
-          {request.vehicle.make} {request.vehicle.model} · {request.vehicle.year}
+        <div className="card__top-row">
+          <div className="card__vehicle">
+            {request.vehicle.make} {request.vehicle.model} ·{" "}
+            {request.vehicle.year}
+          </div>
+          <span
+            className={`urgency-badge urgency-badge--${request.urgency}`}
+            title={`Urgence : ${urgencyMeta(request.urgency).label}`}
+          >
+            {urgencyMeta(request.urgency).emoji}{" "}
+            {urgencyMeta(request.urgency).label}
+          </span>
         </div>
         <h1 className="detail__title">{request.partName}</h1>
         <p className="muted" style={{ margin: "0 0 0.6rem" }}>
@@ -33,6 +44,7 @@ export default function RequestDetailPage({
         </p>
         <div className="meta-row">
           <span>📍 {request.buyer.label}</span>
+          <span>⏱ Fenêtre de bid : {formatWindow(request.urgency)}</span>
           <span>
             {ranked.length} {ranked.length > 1 ? "offres reçues" : "offre reçue"}
           </span>

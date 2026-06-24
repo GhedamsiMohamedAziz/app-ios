@@ -21,6 +21,7 @@ CREATE TABLE part_requests (
   buyer_lat     DOUBLE PRECISION NOT NULL,
   buyer_lng     DOUBLE PRECISION NOT NULL,
   buyer_label   TEXT NOT NULL,
+  urgency       TEXT NOT NULL DEFAULT 'standard' CHECK (urgency IN ('critical','urgent','standard','scheduled')),
   status        TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );

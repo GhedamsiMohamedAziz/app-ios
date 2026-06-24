@@ -25,6 +25,7 @@ const seedRequests: PartRequest[] = [
     description:
       "Jeu de plaquettes avant pour Golf 7 1.6 TDI. Origine ou équivalent qualité OEM.",
     buyer: { lat: 36.8065, lng: 10.1815, label: "Tunis Centre" },
+    urgency: "standard",
     status: "open",
     createdAt: "2026-06-24T08:00:00.000Z",
   },
@@ -35,6 +36,7 @@ const seedRequests: PartRequest[] = [
     description:
       "Rétroviseur extérieur côté passager, électrique, peint. Couleur gris.",
     buyer: { lat: 35.8256, lng: 10.6411, label: "Sousse" },
+    urgency: "urgent",
     status: "open",
     createdAt: "2026-06-24T09:30:00.000Z",
   },
@@ -44,6 +46,7 @@ const seedRequests: PartRequest[] = [
     partName: "Alternateur",
     description: "Alternateur reconditionné accepté. 1.5 dCi.",
     buyer: { lat: 36.4513, lng: 10.7357, label: "Nabeul" },
+    urgency: "critical",
     status: "open",
     createdAt: "2026-06-24T10:15:00.000Z",
   },
@@ -136,6 +139,7 @@ export function createRequest(input: NewRequestInput): PartRequest {
     partName: input.partName,
     description: input.description,
     buyer: { lat: input.buyerLat, lng: input.buyerLng, label: input.buyerLabel },
+    urgency: input.urgency,
     status: "open",
     createdAt: nowIso(),
   };

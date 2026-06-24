@@ -1,4 +1,5 @@
-import type { NewBidInput, NewRequestInput, PartCondition } from "./types";
+import type { NewBidInput, NewRequestInput, PartCondition, Urgency } from "./types";
+import { URGENCY_LEVELS, urgencyMeta } from "./urgency";
 
 /** Thrown when boundary input fails validation. API routes map it to HTTP 400. */
 export class ValidationError extends Error {
@@ -33,6 +34,16 @@ const CONDITIONS: PartCondition[] = ["new", "used", "refurbished"];
 
 export function parseNewRequest(body: unknown): NewRequestInput {
   const b = (body ?? {}) as Record<string, unknown>;
+  const urgencyRaw = (b.urgency ?? "standard") as string;
+  if (!URGENCY_LEVELS.includes(urgencyRaw as Urgency)) {
+    throw new ValidationError(
+      `"urgency" must be one of: ${URGENCY_LEVELS.join(", ")}.`,
+    );
+  }
+  const urgency = urgencyRaw as Urgency;
+  if (!urgencyMeta(urgency).enabledInV1) {
+    throw new ValidationError(`"urgency" "${urgency}" is not available in v1.`);
+  }
   return {
     make: asString(b.make, "make", 60),
     model: asString(b.model, "model", 60),
@@ -42,6 +53,7 @@ export function parseNewRequest(body: unknown): NewRequestInput {
     buyerLabel: asString(b.buyerLabel, "buyerLabel", 120),
     buyerLat: asNumber(b.buyerLat, "buyerLat", -90, 90),
     buyerLng: asNumber(b.buyerLng, "buyerLng", -180, 180),
+    urgency,
   };
 }
 

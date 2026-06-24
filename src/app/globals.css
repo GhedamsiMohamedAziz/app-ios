@@ -511,6 +511,115 @@ a.card:hover::before { width: 6px; }
   color: var(--color-ink-soft);
 }
 
+/* ── Topbar nav links ──────────────────────────────────── */
+.topnav { display: flex; align-items: center; gap: 1.2rem; }
+.topnav__link {
+  font-size: 0.92rem; font-weight: 600;
+  color: var(--color-ink-soft);
+  padding: 0.35rem 0; position: relative;
+  transition: color 140ms var(--ease);
+}
+.topnav__link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px;
+  background: var(--color-accent); border-radius: 2px;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 200ms var(--ease);
+}
+.topnav__link:hover { color: var(--color-ink); }
+.topnav__link:hover::after { transform: scaleX(1); }
+
+/* ── Seller view ──────────────────────────────────────── */
+.seller-hero { padding: 1.5rem 0 0.5rem; }
+.city-picker {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  background: var(--color-surface); border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill); padding: 0.35rem 0.4rem 0.35rem 0.95rem;
+  box-shadow: var(--shadow-sm);
+}
+.city-picker__lead { font-size: 0.85rem; color: var(--color-ink-soft); font-weight: 600; }
+.city-picker__select {
+  font: inherit; font-weight: 600; color: var(--color-ink);
+  background: transparent; border: 0; padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-pill); cursor: pointer;
+}
+.city-picker__select:hover { background: var(--color-surface-2); }
+.city-picker__select:focus { outline: none; box-shadow: 0 0 0 2px var(--color-accent-soft); }
+
+.seller-list {
+  list-style: none; padding: 0; margin: 0 0 var(--space-section);
+  display: flex; flex-direction: column; gap: 0.7rem;
+}
+.seller-row {
+  display: grid;
+  grid-template-columns: 96px 1fr auto auto;
+  gap: 1rem; align-items: center;
+  position: relative; overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line); border-radius: var(--radius);
+  padding: 1rem 1.2rem; box-shadow: var(--shadow-sm);
+  transition: transform 180ms var(--ease), box-shadow 200ms var(--ease), border-color 180ms var(--ease);
+}
+.seller-row::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; background: var(--color-line);
+  transition: width 200ms var(--ease);
+}
+.seller-row[data-urgency="critical"]::before { background: var(--color-danger); }
+.seller-row[data-urgency="urgent"]::before   { background: var(--color-accent); }
+.seller-row[data-urgency="standard"]::before { background: var(--color-line-strong); }
+.seller-row:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--color-line-strong);
+}
+.seller-row:hover::before { width: 6px; }
+.seller-row__dist {
+  text-align: center;
+  background: var(--color-accent-soft);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.4rem;
+  color: var(--color-accent);
+}
+.seller-row__dist-emoji { display: block; font-size: 0.95rem; }
+.seller-row__dist-num {
+  font-family: var(--font-display), serif; font-style: italic;
+  font-size: 1.45rem; line-height: 1; display: block;
+}
+.seller-row__dist-unit { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.seller-row__vehicle {
+  font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-ink-mute);
+}
+.seller-row__title {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.015em;
+  margin: 0.2rem 0 0.3rem;
+}
+.seller-row__desc {
+  color: var(--color-ink-soft); font-size: 0.92rem; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+}
+.seller-row__meta {
+  display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end;
+  max-width: 280px;
+}
+.seller-row__cta {
+  font-weight: 700; color: var(--color-accent); white-space: nowrap; font-size: 0.92rem;
+}
+@media (max-width: 760px) {
+  .seller-row {
+    grid-template-columns: 72px 1fr;
+    grid-template-areas:
+      "dist main"
+      "dist meta"
+      "cta cta";
+    gap: 0.7rem;
+  }
+  .seller-row__dist { grid-area: dist; }
+  .seller-row__main { grid-area: main; }
+  .seller-row__meta { grid-area: meta; justify-content: flex-start; max-width: 100%; }
+  .seller-row__cta { grid-area: cta; text-align: right; }
+}
+
 /* ── Footer ────────────────────────────────────────────── */
 footer.site {
   border-top: 1px solid var(--color-line);

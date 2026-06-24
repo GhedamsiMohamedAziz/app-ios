@@ -48,7 +48,13 @@ export default function RootLayout({
                 Wamia<span className="brand__name-soft"> Parts</span>
               </span>
             </Link>
-            <nav aria-label="Navigation principale">
+            <nav aria-label="Navigation principale" className="topnav">
+              <Link href="/" className="topnav__link">
+                Acheter
+              </Link>
+              <Link href="/seller" className="topnav__link">
+                Vendre
+              </Link>
               <Link href="/requests/new" className="btn btn--primary">
                 <span aria-hidden>＋</span> Nouvelle demande
               </Link>

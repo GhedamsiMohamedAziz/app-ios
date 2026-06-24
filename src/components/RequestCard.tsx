@@ -12,6 +12,7 @@ export function RequestCard({ request }: { request: PartRequest }) {
     <Link
       href={`/requests/${request.id}`}
       className={`card${closed ? " card--closed" : ""}`}
+      data-urgency={request.urgency}
     >
       <div className="card__top-row">
         <div className="card__vehicle">

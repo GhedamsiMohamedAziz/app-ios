@@ -67,7 +67,7 @@ export function parseNewBid(body: unknown): NewBidInput {
     sellerName: asString(b.sellerName, "sellerName", 80),
     sellerRating: asNumber(b.sellerRating, "sellerRating", 0, 5),
     price: asNumber(b.price, "price", 0, 1_000_000),
-    currency: asString(b.currency, "currency", 8),
+    // currency intentionally omitted — locked to DEFAULT_CURRENCY in createBid().
     condition,
     sellerLabel: asString(b.sellerLabel, "sellerLabel", 120),
     sellerLat: asNumber(b.sellerLat, "sellerLat", -90, 90),

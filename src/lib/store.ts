@@ -4,6 +4,7 @@ import type {
   NewRequestInput,
   PartRequest,
 } from "./types";
+import { DEFAULT_CURRENCY } from "./config";
 
 /**
  * In-memory store for v1 (no database yet). State lives for the lifetime of the
@@ -154,7 +155,7 @@ export function createBid(requestId: string, input: NewBidInput): Bid {
     sellerName: input.sellerName,
     sellerRating: input.sellerRating,
     price: input.price,
-    currency: input.currency,
+    currency: DEFAULT_CURRENCY,
     condition: input.condition,
     seller: { lat: input.sellerLat, lng: input.sellerLng, label: input.sellerLabel },
     etaDays: input.etaDays,

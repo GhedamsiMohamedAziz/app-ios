@@ -26,11 +26,11 @@ export function PlaceBidForm({ requestId }: { requestId: string }) {
       PRESET_LOCATIONS.find((l) => l.label === form.get("sellerLabel")) ??
       PRESET_LOCATIONS[0];
 
+    // currency is no longer sent — the server locks it via DEFAULT_CURRENCY.
     const payload = {
       sellerName: form.get("sellerName"),
       sellerRating: Number(form.get("sellerRating")),
       price: Number(form.get("price")),
-      currency: "TND",
       condition: form.get("condition"),
       sellerLabel: loc.label,
       sellerLat: loc.lat,

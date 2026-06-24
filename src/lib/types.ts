@@ -75,7 +75,8 @@ export interface NewBidInput {
   sellerName: string;
   sellerRating: number;
   price: number;
-  currency: string;
+  // currency removed in DARRAGI-CURRENCY-001 — locked to DEFAULT_CURRENCY at
+  // the store boundary. Pivot path: re-add this field + a UI picker.
   condition: PartCondition;
   sellerLabel: string;
   sellerLat: number;

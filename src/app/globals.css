@@ -487,6 +487,30 @@ a.card:hover::before { width: 6px; }
 .panel--closed { background: var(--color-surface-2); border-style: dashed; }
 .panel--closed h3 { color: var(--color-ink-soft); }
 
+/* Variant + origin badges */
+.bid__variant {
+  display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.45rem;
+}
+.variant-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem; border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line);
+}
+.variant-badge--oem {
+  color: #5b3a8c; background: #ede7f7; border-color: transparent;
+}
+.variant-badge--adaptable {
+  color: var(--color-best); background: var(--color-best-soft); border-color: transparent;
+}
+.origin-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.72rem; font-weight: 600;
+  padding: 0.2rem 0.55rem; border-radius: var(--radius-pill);
+  background: var(--color-surface-2); border: 1px solid var(--color-line);
+  color: var(--color-ink-soft);
+}
+
 /* ── Footer ────────────────────────────────────────────── */
 footer.site {
   border-top: 1px solid var(--color-line);

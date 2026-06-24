@@ -4,6 +4,12 @@ export type PartCondition = "new" | "used" | "refurbished";
 export type RequestStatus = "open" | "closed";
 
 /**
+ * Part variant kind. OEM = original manufacturer; adaptable = aftermarket.
+ * Sellers post one bid per (kind, origin) combo — see DARRAGI-VARIANTS-001.
+ */
+export type VariantKind = "oem" | "adaptable";
+
+/**
  * Buyer-declared urgency. Drives the bid window duration (see lib/urgency.ts)
  * and seller-notification priority. `scheduled` reserves the slot for the v1.1
  * passive mode (target price + daily recurrence) — see DARRAGI-PASSIVE-001.
@@ -30,6 +36,8 @@ export interface PartRequest {
   description: string;
   buyer: GeoPoint;
   urgency: Urgency;
+  /** Which variant kinds the buyer accepts. Must contain at least one element. */
+  acceptedVariants: VariantKind[];
   status: RequestStatus;
   createdAt: string; // ISO
   /** ISO. Computed from urgency. Null only in passive mode (urgency=scheduled). */
@@ -45,6 +53,11 @@ export interface Bid {
   price: number;
   currency: string;
   condition: PartCondition;
+  /** OEM original or adaptable (aftermarket). Must be in request.acceptedVariants. */
+  kind: VariantKind;
+  /** Manufacturer / country origin label (free text + presets, see lib/variants).
+   *  Null for OEM (origin implicit = vehicle brand) or unspecified adaptable. */
+  origin: string | null;
   seller: GeoPoint;
   etaDays: number;
   createdAt: string; // ISO
@@ -71,6 +84,7 @@ export interface NewRequestInput {
   buyerLat: number;
   buyerLng: number;
   urgency: Urgency;
+  acceptedVariants: VariantKind[];
 }
 
 export interface NewBidInput {
@@ -80,6 +94,8 @@ export interface NewBidInput {
   // currency removed in DARRAGI-CURRENCY-001 — locked to DEFAULT_CURRENCY at
   // the store boundary. Pivot path: re-add this field + a UI picker.
   condition: PartCondition;
+  kind: VariantKind;
+  origin: string | null;
   sellerLabel: string;
   sellerLat: number;
   sellerLng: number;

@@ -38,6 +38,16 @@ export async function POST(req: Request, { params }: Params) {
   try {
     const body = await req.json();
     const input = parseNewBid(body);
+    // Enforce that the seller's chosen kind is one the buyer accepts.
+    if (!request.acceptedVariants.includes(input.kind)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: `This request only accepts: ${request.acceptedVariants.join(", ")}.`,
+        },
+        { status: 409 },
+      );
+    }
     const bid = createBid(params.id, input);
     return NextResponse.json({ data: bid, error: null }, { status: 201 });
   } catch (err) {

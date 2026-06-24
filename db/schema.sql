@@ -22,6 +22,11 @@ CREATE TABLE part_requests (
   buyer_lng     DOUBLE PRECISION NOT NULL,
   buyer_label   TEXT NOT NULL,
   urgency       TEXT NOT NULL DEFAULT 'standard' CHECK (urgency IN ('critical','urgent','standard','scheduled')),
+  -- accepted_variants: which Bid.kind values this request will accept.
+  -- Postgres TEXT[] — DARRAGI-VARIANTS-001. CHECK guards subset of {oem,adaptable}.
+  accepted_variants TEXT[] NOT NULL DEFAULT ARRAY['oem','adaptable']
+    CHECK (cardinality(accepted_variants) > 0
+           AND accepted_variants <@ ARRAY['oem','adaptable']),
   status        TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   expires_at    TIMESTAMPTZ              -- NULL only in scheduled/passive mode (DARRAGI-BIDWIN-002)
@@ -40,6 +45,9 @@ CREATE TABLE bids (
   price         NUMERIC(12,2) NOT NULL CHECK (price >= 0),
   currency      TEXT NOT NULL DEFAULT 'TND',
   condition     TEXT NOT NULL CHECK (condition IN ('new','used','refurbished')),
+  -- DARRAGI-VARIANTS-001
+  kind          TEXT NOT NULL CHECK (kind IN ('oem','adaptable')),
+  origin        TEXT,             -- free text (presets: Allemagne, France, …); NULL allowed
   seller_lat    DOUBLE PRECISION NOT NULL,
   seller_lng    DOUBLE PRECISION NOT NULL,
   seller_label  TEXT NOT NULL,

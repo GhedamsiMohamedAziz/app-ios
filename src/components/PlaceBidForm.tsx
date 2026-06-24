@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { VariantKind } from "@/lib/types";
+import { ADAPTABLE_ORIGIN_PRESETS, kindMeta } from "@/lib/variants";
 
 const PRESET_LOCATIONS = [
   { label: "Tunis Centre", lat: 36.8065, lng: 10.1815 },
@@ -11,10 +13,18 @@ const PRESET_LOCATIONS = [
   { label: "Sousse", lat: 35.8256, lng: 10.6411 },
 ];
 
-export function PlaceBidForm({ requestId }: { requestId: string }) {
+interface PlaceBidFormProps {
+  requestId: string;
+  acceptedVariants: VariantKind[];
+}
+
+export function PlaceBidForm({ requestId, acceptedVariants }: PlaceBidFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [kind, setKind] = useState<VariantKind>(acceptedVariants[0]);
+  const [origin, setOrigin] = useState("");
+  const onlyOne = acceptedVariants.length === 1;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,6 +42,8 @@ export function PlaceBidForm({ requestId }: { requestId: string }) {
       sellerRating: Number(form.get("sellerRating")),
       price: Number(form.get("price")),
       condition: form.get("condition"),
+      kind,
+      origin: kind === "adaptable" ? origin.trim() || null : null,
       sellerLabel: loc.label,
       sellerLat: loc.lat,
       sellerLng: loc.lng,
@@ -66,6 +78,59 @@ export function PlaceBidForm({ requestId }: { requestId: string }) {
         <p className="form-error" role="alert">
           {error}
         </p>
+      )}
+
+      <fieldset className="urgency-picker">
+        <legend>Variante</legend>
+        <div className="urgency-picker__row" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+          {acceptedVariants.map((k) => {
+            const meta = kindMeta(k);
+            const selected = kind === k;
+            return (
+              <label
+                key={k}
+                className={`urgency-chip${selected ? " is-selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="kind"
+                  value={k}
+                  checked={selected}
+                  disabled={onlyOne}
+                  onChange={() => setKind(k)}
+                />
+                <span className="urgency-chip__emoji" aria-hidden>
+                  {meta.emoji}
+                </span>
+                <span className="urgency-chip__label">{meta.label}</span>
+              </label>
+            );
+          })}
+        </div>
+        {onlyOne && (
+          <p className="form-note">Cette demande n'accepte que <strong>{kindMeta(kind).label}</strong>.</p>
+        )}
+      </fieldset>
+
+      {kind === "adaptable" && (
+        <div className="field">
+          <label htmlFor="origin">Origine (pays / marque)</label>
+          <input
+            id="origin"
+            name="origin"
+            list="origin-presets"
+            placeholder="Allemagne, Chine, Turquie…"
+            value={origin}
+            onChange={(e) => setOrigin(e.target.value)}
+            maxLength={60}
+          />
+          <datalist id="origin-presets">
+            {ADAPTABLE_ORIGIN_PRESETS.map((p) => (
+              <option key={p.name} value={p.name}>{p.flag} {p.name}</option>
+            ))}
+          </datalist>
+          <p className="form-note">Optionnel — aide l'acheteur à choisir la qualité.</p>
+        </div>
       )}
 
       <div className="field">

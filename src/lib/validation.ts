@@ -1,5 +1,6 @@
-import type { NewBidInput, NewRequestInput, PartCondition, Urgency } from "./types";
+import type { NewBidInput, NewRequestInput, PartCondition, Urgency, VariantKind } from "./types";
 import { URGENCY_LEVELS, urgencyMeta } from "./urgency";
+import { VARIANT_KINDS } from "./variants";
 
 /** Thrown when boundary input fails validation. API routes map it to HTTP 400. */
 export class ValidationError extends Error {
@@ -44,6 +45,19 @@ export function parseNewRequest(body: unknown): NewRequestInput {
   if (!urgencyMeta(urgency).enabledInV1) {
     throw new ValidationError(`"urgency" "${urgency}" is not available in v1.`);
   }
+  // acceptedVariants — default to both. Must be a non-empty subset of VARIANT_KINDS.
+  const rawAccepted = Array.isArray(b.acceptedVariants)
+    ? (b.acceptedVariants as unknown[])
+    : ["oem", "adaptable"];
+  const acceptedVariants = rawAccepted.filter(
+    (v): v is VariantKind => typeof v === "string" && VARIANT_KINDS.includes(v as VariantKind),
+  );
+  if (acceptedVariants.length === 0) {
+    throw new ValidationError(
+      `"acceptedVariants" must contain at least one of: ${VARIANT_KINDS.join(", ")}.`,
+    );
+  }
+
   return {
     make: asString(b.make, "make", 60),
     model: asString(b.model, "model", 60),
@@ -54,6 +68,7 @@ export function parseNewRequest(body: unknown): NewRequestInput {
     buyerLat: asNumber(b.buyerLat, "buyerLat", -90, 90),
     buyerLng: asNumber(b.buyerLng, "buyerLng", -180, 180),
     urgency,
+    acceptedVariants,
   };
 }
 
@@ -63,12 +78,26 @@ export function parseNewBid(body: unknown): NewBidInput {
   if (!CONDITIONS.includes(condition)) {
     throw new ValidationError(`"condition" must be one of: ${CONDITIONS.join(", ")}.`);
   }
+  // kind — mandatory; must be a known variant kind.
+  const kindRaw = asString(b.kind, "kind", 20);
+  if (!VARIANT_KINDS.includes(kindRaw as VariantKind)) {
+    throw new ValidationError(
+      `"kind" must be one of: ${VARIANT_KINDS.join(", ")}.`,
+    );
+  }
+  const kind = kindRaw as VariantKind;
+  // origin — optional free string; only meaningful for adaptable. Trim + cap.
+  const originRaw = typeof b.origin === "string" ? b.origin.trim() : "";
+  const origin = originRaw.length > 0 ? originRaw.slice(0, 60) : null;
+
   return {
     sellerName: asString(b.sellerName, "sellerName", 80),
     sellerRating: asNumber(b.sellerRating, "sellerRating", 0, 5),
     price: asNumber(b.price, "price", 0, 1_000_000),
     // currency intentionally omitted — locked to DEFAULT_CURRENCY in createBid().
     condition,
+    kind,
+    origin,
     sellerLabel: asString(b.sellerLabel, "sellerLabel", 120),
     sellerLat: asNumber(b.sellerLat, "sellerLat", -90, 90),
     sellerLng: asNumber(b.sellerLng, "sellerLng", -180, 180),

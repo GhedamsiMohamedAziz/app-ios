@@ -2,8 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Urgency } from "@/lib/types";
+import type { Urgency, VariantKind } from "@/lib/types";
 import { URGENCY_LEVELS, urgencyMeta } from "@/lib/urgency";
+
+type AcceptedScope = "oem-only" | "adaptable-only" | "both";
+const SCOPE_TO_VARIANTS: Record<AcceptedScope, VariantKind[]> = {
+  "oem-only": ["oem"],
+  "adaptable-only": ["adaptable"],
+  both: ["oem", "adaptable"],
+};
+const SCOPE_OPTIONS: { value: AcceptedScope; emoji: string; label: string; hint: string }[] = [
+  { value: "oem-only", emoji: "🏷", label: "OEM uniquement", hint: "Qualité origine, prix plus élevé." },
+  { value: "adaptable-only", emoji: "🧰", label: "Adaptable uniquement", hint: "Aftermarket, plus économique." },
+  { value: "both", emoji: "📦", label: "Les deux acceptés", hint: "Recommandé — plus d'offres reçues." },
+];
 
 const PRESET_LOCATIONS = [
   { label: "Tunis Centre", lat: 36.8065, lng: 10.1815 },
@@ -22,6 +34,7 @@ export function NewRequestForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [urgency, setUrgency] = useState<Urgency>("standard");
+  const [scope, setScope] = useState<AcceptedScope>("both");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,6 +56,7 @@ export function NewRequestForm() {
       buyerLat: loc.lat,
       buyerLng: loc.lng,
       urgency,
+      acceptedVariants: SCOPE_TO_VARIANTS[scope],
     };
 
     try {
@@ -133,6 +147,36 @@ export function NewRequestForm() {
           Plus c'est précis, plus le matching vendeur est juste.
         </p>
       </div>
+
+      <fieldset className="urgency-picker">
+        <legend>Variantes acceptées</legend>
+        <div className="urgency-picker__row">
+          {SCOPE_OPTIONS.map((opt) => {
+            const selected = scope === opt.value;
+            return (
+              <label
+                key={opt.value}
+                className={`urgency-chip${selected ? " is-selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="acceptedScope"
+                  value={opt.value}
+                  checked={selected}
+                  onChange={() => setScope(opt.value)}
+                />
+                <span className="urgency-chip__emoji" aria-hidden>
+                  {opt.emoji}
+                </span>
+                <span className="urgency-chip__label">{opt.label}</span>
+              </label>
+            );
+          })}
+        </div>
+        <p className="form-note urgency-tradeoff" role="status">
+          {SCOPE_OPTIONS.find((o) => o.value === scope)?.hint}
+        </p>
+      </fieldset>
 
       <fieldset className="urgency-picker">
         <legend>Urgence</legend>

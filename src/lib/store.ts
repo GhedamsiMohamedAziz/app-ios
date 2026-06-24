@@ -32,8 +32,9 @@ const seedRequests: PartRequest[] = (() => {
         "Jeu de plaquettes avant pour Golf 7 1.6 TDI. Origine ou équivalent qualité OEM.",
       buyer: { lat: 36.8065, lng: 10.1815, label: "Tunis Centre" },
       urgency: "standard",
+      acceptedVariants: ["oem", "adaptable"],
       status: "open",
-      ageMin: 30, // ~23 h 30 restant (fenêtre 24 h)
+      ageMin: 30,
     },
     {
       id: "req-1002",
@@ -43,8 +44,9 @@ const seedRequests: PartRequest[] = (() => {
         "Rétroviseur extérieur côté passager, électrique, peint. Couleur gris.",
       buyer: { lat: 35.8256, lng: 10.6411, label: "Sousse" },
       urgency: "urgent",
+      acceptedVariants: ["adaptable"], // l'acheteur veut juste de l'aftermarket
       status: "open",
-      ageMin: 5, // ~25 min restant (fenêtre 30 min)
+      ageMin: 5,
     },
     {
       id: "req-1003",
@@ -53,8 +55,9 @@ const seedRequests: PartRequest[] = (() => {
       description: "Alternateur reconditionné accepté. 1.5 dCi.",
       buyer: { lat: 36.4513, lng: 10.7357, label: "Nabeul" },
       urgency: "critical",
+      acceptedVariants: ["oem", "adaptable"],
       status: "open",
-      ageMin: 1, // ~4 min restant (fenêtre 5 min)
+      ageMin: 1,
     },
   ];
   return specs.map(({ ageMin, ...rest }) => {
@@ -68,6 +71,7 @@ const seedRequests: PartRequest[] = (() => {
 })();
 
 const seedBids: Bid[] = [
+  // Mix OEM + adaptable (Allemagne / Chine) sur la demande standard → montre les badges
   {
     id: "bid-2001",
     requestId: "req-1001",
@@ -76,6 +80,8 @@ const seedBids: Bid[] = [
     price: 85,
     currency: "TND",
     condition: "new",
+    kind: "adaptable",
+    origin: "Allemagne",
     seller: { lat: 36.8325, lng: 10.2299, label: "Les Berges du Lac" },
     etaDays: 1,
     createdAt: "2026-06-24T08:45:00.000Z",
@@ -85,9 +91,11 @@ const seedBids: Bid[] = [
     requestId: "req-1001",
     sellerName: "Garage El Manar",
     sellerRating: 4.1,
-    price: 72,
+    price: 52,
     currency: "TND",
-    condition: "refurbished",
+    condition: "new",
+    kind: "adaptable",
+    origin: "Chine",
     seller: { lat: 36.8511, lng: 10.1647, label: "El Manar" },
     etaDays: 2,
     createdAt: "2026-06-24T09:05:00.000Z",
@@ -97,13 +105,16 @@ const seedBids: Bid[] = [
     requestId: "req-1001",
     sellerName: "Pièces Express Ariana",
     sellerRating: 4.8,
-    price: 95,
+    price: 145,
     currency: "TND",
     condition: "new",
+    kind: "oem",
+    origin: null,
     seller: { lat: 36.8625, lng: 10.1956, label: "Ariana" },
     etaDays: 1,
     createdAt: "2026-06-24T09:20:00.000Z",
   },
+  // Même vendeur peut bidder 2 fois (modèle A) — l'acheteur n'accepte que l'adaptable
   {
     id: "bid-2004",
     requestId: "req-1002",
@@ -112,6 +123,8 @@ const seedBids: Bid[] = [
     price: 140,
     currency: "TND",
     condition: "used",
+    kind: "adaptable",
+    origin: "Turquie",
     seller: { lat: 35.8278, lng: 10.6, label: "Sousse Riadh" },
     etaDays: 3,
     createdAt: "2026-06-24T10:00:00.000Z",
@@ -169,6 +182,7 @@ export function createRequest(input: NewRequestInput): PartRequest {
     description: input.description,
     buyer: { lat: input.buyerLat, lng: input.buyerLng, label: input.buyerLabel },
     urgency: input.urgency,
+    acceptedVariants: input.acceptedVariants,
     status: "open",
     createdAt,
     expiresAt: computeExpiresAt(createdAt, input.urgency),
@@ -186,6 +200,8 @@ export function createBid(requestId: string, input: NewBidInput): Bid {
     price: input.price,
     currency: DEFAULT_CURRENCY,
     condition: input.condition,
+    kind: input.kind,
+    origin: input.origin,
     seller: { lat: input.sellerLat, lng: input.sellerLng, label: input.sellerLabel },
     etaDays: input.etaDays,
     createdAt: nowIso(),

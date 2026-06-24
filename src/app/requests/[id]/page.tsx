@@ -5,6 +5,7 @@ import { rankBids } from "@/lib/ranking";
 import { conditionLabel, formatPrice, stars } from "@/lib/format";
 import { formatWindow, urgencyMeta } from "@/lib/urgency";
 import { timeRemaining } from "@/lib/expiry";
+import { kindMeta, originFlag } from "@/lib/variants";
 import { PlaceBidForm } from "@/components/PlaceBidForm";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,11 @@ export default function RequestDetailPage({
               ⏱ Reste {timeRemaining(request)}
             </span>
           )}
+          <span className="pill" title="Variantes acceptées">
+            {request.acceptedVariants.length === 2
+              ? "📦 OEM + Adaptable acceptés"
+              : `${kindMeta(request.acceptedVariants[0]).emoji} ${kindMeta(request.acceptedVariants[0]).label} uniquement`}
+          </span>
           <span>
             {ranked.length} {ranked.length > 1 ? "offres reçues" : "offre reçue"}
           </span>
@@ -82,6 +88,19 @@ export default function RequestDetailPage({
                     <span className="bid__rank">#{i + 1}</span>{" "}
                     <span className="bid__seller">{bid.sellerName}</span>
                     <div className="bid__rating">{stars(bid.sellerRating)}</div>
+                    <div className="bid__variant">
+                      <span
+                        className={`variant-badge variant-badge--${bid.kind}`}
+                        title={kindMeta(bid.kind).blurb}
+                      >
+                        {kindMeta(bid.kind).emoji} {kindMeta(bid.kind).label}
+                      </span>
+                      {bid.kind === "adaptable" && bid.origin && (
+                        <span className="origin-badge">
+                          {originFlag(bid.origin)} {bid.origin}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     {i === 0 && <span className="badge-best">Meilleur deal</span>}
@@ -125,7 +144,10 @@ export default function RequestDetailPage({
 
         <aside>
           {request.status === "open" ? (
-            <PlaceBidForm requestId={request.id} />
+            <PlaceBidForm
+              requestId={request.id}
+              acceptedVariants={request.acceptedVariants}
+            />
           ) : (
             <div className="panel panel--closed" role="status">
               <h3>Demande clôturée</h3>

@@ -35,6 +35,8 @@ export function NewRequestForm() {
   const [submitting, setSubmitting] = useState(false);
   const [urgency, setUrgency] = useState<Urgency>("standard");
   const [scope, setScope] = useState<AcceptedScope>("both");
+  const [targetOem, setTargetOem] = useState<string>("");
+  const [targetAdaptable, setTargetAdaptable] = useState<string>("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,6 +48,17 @@ export function NewRequestForm() {
       PRESET_LOCATIONS.find((l) => l.label === form.get("buyerLabel")) ??
       PRESET_LOCATIONS[0];
 
+    const variants = SCOPE_TO_VARIANTS[scope];
+    const target: Partial<Record<VariantKind, number>> = {};
+    if (variants.includes("oem") && targetOem.trim() !== "") {
+      const n = Number(targetOem);
+      if (Number.isFinite(n) && n > 0) target.oem = n;
+    }
+    if (variants.includes("adaptable") && targetAdaptable.trim() !== "") {
+      const n = Number(targetAdaptable);
+      if (Number.isFinite(n) && n > 0) target.adaptable = n;
+    }
+
     const payload = {
       make: form.get("make"),
       model: form.get("model"),
@@ -56,7 +69,8 @@ export function NewRequestForm() {
       buyerLat: loc.lat,
       buyerLng: loc.lng,
       urgency,
-      acceptedVariants: SCOPE_TO_VARIANTS[scope],
+      acceptedVariants: variants,
+      targetPrice: Object.keys(target).length > 0 ? target : null,
     };
 
     try {
@@ -205,6 +219,50 @@ export function NewRequestForm() {
         <p className="form-note urgency-tradeoff" role="status">
           {urgencyMeta(urgency).tradeoff}
         </p>
+      </fieldset>
+
+      <fieldset className="target-prices">
+        <legend>
+          Prix cible <span className="muted">(optionnel)</span>
+        </legend>
+        <p className="form-note">
+          On affiche en vert les offres ≤ cible, en rouge celles au-dessus.
+          Le classement ne change pas.
+        </p>
+        <div className="target-prices__row">
+          {SCOPE_TO_VARIANTS[scope].includes("oem") && (
+            <div className="field" style={{ margin: 0 }}>
+              <label htmlFor="targetOem">🏷 Cible OEM (TND)</label>
+              <input
+                id="targetOem"
+                name="targetOem"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                step={1}
+                placeholder="ex. 130"
+                value={targetOem}
+                onChange={(e) => setTargetOem(e.target.value)}
+              />
+            </div>
+          )}
+          {SCOPE_TO_VARIANTS[scope].includes("adaptable") && (
+            <div className="field" style={{ margin: 0 }}>
+              <label htmlFor="targetAdaptable">🧰 Cible Adaptable (TND)</label>
+              <input
+                id="targetAdaptable"
+                name="targetAdaptable"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                step={1}
+                placeholder="ex. 80"
+                value={targetAdaptable}
+                onChange={(e) => setTargetAdaptable(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
       </fieldset>
 
       <button className="btn btn--primary" type="submit" disabled={submitting}>

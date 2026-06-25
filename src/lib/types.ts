@@ -42,6 +42,9 @@ export interface PartRequest {
   createdAt: string; // ISO
   /** ISO. Computed from urgency. Null only in passive mode (urgency=scheduled). */
   expiresAt: string | null;
+  /** Optional target price per variant kind. Drives the green/red coding on
+   *  incoming bids without altering the ranking. DARRAGI-PASSIVE-001 (visual). */
+  targetPrice: Partial<Record<VariantKind, number>> | null;
 }
 
 /** A seller's offer on a request. */
@@ -85,6 +88,7 @@ export interface NewRequestInput {
   buyerLng: number;
   urgency: Urgency;
   acceptedVariants: VariantKind[];
+  targetPrice: Partial<Record<VariantKind, number>> | null;
 }
 
 export interface NewBidInput {

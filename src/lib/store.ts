@@ -33,6 +33,9 @@ const seedRequests: PartRequest[] = (() => {
       buyer: { lat: 36.8065, lng: 10.1815, label: "Tunis Centre" },
       urgency: "standard",
       acceptedVariants: ["oem", "adaptable"],
+      // Buyer set targets — adaptable bids ≤ 80 TND are flagged green,
+      // OEM bids ≤ 130 TND are flagged green. Seeds the visual demo.
+      targetPrice: { adaptable: 80, oem: 130 },
       status: "open",
       ageMin: 30,
     },
@@ -45,6 +48,7 @@ const seedRequests: PartRequest[] = (() => {
       buyer: { lat: 35.8256, lng: 10.6411, label: "Sousse" },
       urgency: "urgent",
       acceptedVariants: ["adaptable"], // l'acheteur veut juste de l'aftermarket
+      targetPrice: null,
       status: "open",
       ageMin: 5,
     },
@@ -56,6 +60,7 @@ const seedRequests: PartRequest[] = (() => {
       buyer: { lat: 36.4513, lng: 10.7357, label: "Nabeul" },
       urgency: "critical",
       acceptedVariants: ["oem", "adaptable"],
+      targetPrice: null,
       status: "open",
       ageMin: 1,
     },
@@ -183,6 +188,7 @@ export function createRequest(input: NewRequestInput): PartRequest {
     buyer: { lat: input.buyerLat, lng: input.buyerLng, label: input.buyerLabel },
     urgency: input.urgency,
     acceptedVariants: input.acceptedVariants,
+    targetPrice: input.targetPrice,
     status: "open",
     createdAt,
     expiresAt: computeExpiresAt(createdAt, input.urgency),

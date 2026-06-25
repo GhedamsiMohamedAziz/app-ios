@@ -58,6 +58,28 @@ export function parseNewRequest(body: unknown): NewRequestInput {
     );
   }
 
+  // targetPrice — optional; per accepted variant. Drop entries for variants
+  // not in acceptedVariants (a buyer who only accepts adaptable should not be
+  // able to set an OEM target). Empty object → null.
+  let targetPrice: Partial<Record<VariantKind, number>> | null = null;
+  const rawTarget = b.targetPrice;
+  if (rawTarget && typeof rawTarget === "object") {
+    const obj = rawTarget as Record<string, unknown>;
+    const acc: Partial<Record<VariantKind, number>> = {};
+    for (const kind of acceptedVariants) {
+      const raw = obj[kind];
+      if (raw === undefined || raw === null || raw === "") continue;
+      const n = typeof raw === "string" ? Number(raw) : raw;
+      if (typeof n !== "number" || Number.isNaN(n) || n <= 0 || n > 1_000_000) {
+        throw new ValidationError(
+          `"targetPrice.${kind}" must be a positive number under 1 000 000.`,
+        );
+      }
+      acc[kind] = Math.round(n);
+    }
+    if (Object.keys(acc).length > 0) targetPrice = acc;
+  }
+
   return {
     make: asString(b.make, "make", 60),
     model: asString(b.model, "model", 60),
@@ -69,6 +91,7 @@ export function parseNewRequest(body: unknown): NewRequestInput {
     buyerLng: asNumber(b.buyerLng, "buyerLng", -180, 180),
     urgency,
     acceptedVariants,
+    targetPrice,
   };
 }
 

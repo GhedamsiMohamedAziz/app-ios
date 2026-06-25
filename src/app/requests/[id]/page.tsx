@@ -7,6 +7,7 @@ import { formatWindow, urgencyMeta } from "@/lib/urgency";
 import { timeRemaining } from "@/lib/expiry";
 import { kindMeta, originFlag } from "@/lib/variants";
 import { PlaceBidForm } from "@/components/PlaceBidForm";
+import type { VariantKind } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,12 @@ export default function RequestDetailPage({
   if (!request) notFound();
 
   const ranked = rankBids(listBidsForRequest(request.id), request.buyer);
+  const target = request.targetPrice;
+  const targetStatus = (kind: VariantKind, price: number): "under" | "over" | null => {
+    const t = target?.[kind];
+    if (typeof t !== "number") return null;
+    return price <= t ? "under" : "over";
+  };
 
   return (
     <section className="container detail">
@@ -59,6 +66,16 @@ export default function RequestDetailPage({
               ? "📦 OEM + Adaptable acceptés"
               : `${kindMeta(request.acceptedVariants[0]).emoji} ${kindMeta(request.acceptedVariants[0]).label} uniquement`}
           </span>
+          {target?.oem !== undefined && (
+            <span className="pill pill--target" title="Prix cible OEM">
+              🏷 Cible OEM ≤ {target.oem} TND
+            </span>
+          )}
+          {target?.adaptable !== undefined && (
+            <span className="pill pill--target" title="Prix cible Adaptable">
+              🧰 Cible Adaptable ≤ {target.adaptable} TND
+            </span>
+          )}
           <span>
             {ranked.length} {ranked.length > 1 ? "offres reçues" : "offre reçue"}
           </span>
@@ -77,10 +94,12 @@ export default function RequestDetailPage({
               Aucune offre pour l'instant. Soyez le premier à enchérir →
             </div>
           ) : (
-            ranked.map((bid, i) => (
+            ranked.map((bid, i) => {
+              const status = targetStatus(bid.kind, bid.price);
+              return (
               <article
                 key={bid.id}
-                className={`bid${i === 0 ? " bid--best" : ""}`}
+                className={`bid${i === 0 ? " bid--best" : ""}${status ? ` bid--target-${status}` : ""}`}
                 aria-label={`Offre #${i + 1} — ${bid.sellerName}`}
               >
                 <div className="bid__top">
@@ -98,6 +117,16 @@ export default function RequestDetailPage({
                       {bid.kind === "adaptable" && bid.origin && (
                         <span className="origin-badge">
                           {originFlag(bid.origin)} {bid.origin}
+                        </span>
+                      )}
+                      {status === "under" && (
+                        <span className="target-badge target-badge--under" title={`Sous la cible ${target?.[bid.kind]} TND`}>
+                          ✓ Sous la cible
+                        </span>
+                      )}
+                      {status === "over" && (
+                        <span className="target-badge target-badge--over" title={`Au-dessus de la cible ${target?.[bid.kind]} TND`}>
+                          ▲ Au-dessus
                         </span>
                       )}
                     </div>
@@ -138,7 +167,8 @@ export default function RequestDetailPage({
                   />
                 </div>
               </article>
-            ))
+              );
+            })
           )}
         </div>
 

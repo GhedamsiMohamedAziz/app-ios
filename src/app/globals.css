@@ -511,6 +511,57 @@ a.card:hover::before { width: 6px; }
   color: var(--color-ink-soft);
 }
 
+/* ── Target-price coding (DARRAGI-PASSIVE-001) ────────── */
+/* Buyer set a per-variant target. Bids ≤ target get a soft green skin,
+   bids above get a soft red one. Ranking is unchanged — this is a visual
+   read only. Best-deal styling still wins on the border so #1 keeps its
+   ribbon and outline; the target colour bleeds in through the background
+   and a bottom edge. */
+.bid--target-under {
+  background:
+    linear-gradient(0deg, var(--color-best-soft), var(--color-best-soft)) right bottom / 100% 6px no-repeat,
+    var(--color-surface);
+}
+.bid--target-over {
+  background:
+    linear-gradient(0deg, var(--color-danger-soft), var(--color-danger-soft)) right bottom / 100% 6px no-repeat,
+    var(--color-surface);
+}
+.bid--target-under:not(.bid--best) { border-color: var(--color-best); box-shadow: 0 0 0 1px rgba(21,112,74,0.25), var(--shadow-sm); }
+.bid--target-over:not(.bid--best)  { border-color: #d88b86; box-shadow: 0 0 0 1px rgba(179,38,30,0.18), var(--shadow-sm); }
+
+.target-badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em;
+  padding: 0.2rem 0.55rem; border-radius: var(--radius-pill);
+}
+.target-badge--under {
+  color: var(--color-best); background: var(--color-best-soft);
+  border: 1px solid rgba(21,112,74,0.25);
+}
+.target-badge--over {
+  color: var(--color-danger); background: var(--color-danger-soft);
+  border: 1px solid rgba(179,38,30,0.2);
+}
+
+.pill--target {
+  background: var(--color-best-soft); color: var(--color-best);
+  border-color: transparent;
+}
+
+/* Target-price section in the buyer form */
+.target-prices { border: 0; padding: 0; margin: 0 0 1rem; }
+.target-prices legend {
+  font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem; padding: 0;
+}
+.target-prices__row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem;
+  margin-top: 0.45rem;
+}
+@media (max-width: 520px) {
+  .target-prices__row { grid-template-columns: 1fr; }
+}
+
 /* ── Topbar nav links ──────────────────────────────────── */
 .topnav { display: flex; align-items: center; gap: 1.2rem; }
 .topnav__link {
